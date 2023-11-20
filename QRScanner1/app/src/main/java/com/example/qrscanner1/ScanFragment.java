@@ -7,15 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-public class ScanFragment extends Fragment implements ItemEntryListener {
+public class ScanFragment extends Fragment implements ItemEntryListener, MainActivity.ScanResultListener {
     Button btnAddItem, btnBack, btnScan;
     TableLayout tableItems;
+    EditText etScanResult;
     public ScanFragment() {
         // Required empty public constructor
     }
@@ -28,8 +30,13 @@ public class ScanFragment extends Fragment implements ItemEntryListener {
         btnAddItem = view.findViewById(R.id.btn_add_item);
         btnBack = view.findViewById(R.id.btn_back);
         btnScan = view.findViewById(R.id.btn_scan);
+        etScanResult = view.findViewById(R.id.et_text_bar);
         MainActivity mainActivity = (MainActivity) getActivity();
-        btnScan.setOnClickListener(v -> {mainActivity.scanCode();});
+        if (mainActivity != null) {
+            mainActivity.setScanResultListener(this);
+            btnScan.setOnClickListener(v -> mainActivity.scanCode());
+        }
+        //btnScan.setOnClickListener(v -> {mainActivity.scanCode();});
         btnAddItem.setOnClickListener(v -> {
             // Replace with ItemEntryFragment
             getActivity().getSupportFragmentManager().beginTransaction()
@@ -74,6 +81,11 @@ public class ScanFragment extends Fragment implements ItemEntryListener {
         tableItems.addView(newRow);
 //        Log.d("ScanFragment", "tableItems is " + (tableItems == null ? "null" : "not null"));
 
+    }
+
+    @Override
+    public void onScanResult(String result) {
+        etScanResult.setText(result);
     }
 }
 

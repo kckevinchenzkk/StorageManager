@@ -34,10 +34,17 @@
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"/>
 
+    <EditText
+        android:id="@+id/et_text_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Barcode"
+        android:layout_below="@id/btn_back"/>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btn_scan"
+        android:layout_below="@id/et_text_bar"
         android:layout_above="@id/btn_add_item">
 
         <TableLayout
