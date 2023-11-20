@@ -10,6 +10,13 @@ import com.journeyapps.barcodescanner.ScanOptions;
 public class MainActivity extends AppCompatActivity implements ItemEntryListener {
     private TableLayout tableItems;
     private ActivityResultLauncher<ScanOptions> barLauncher;
+    private ScanResultListener scanResultListener;
+    public interface ScanResultListener {
+        void onScanResult(String result);
+    }
+    public void setScanResultListener(ScanResultListener listener) {
+        this.scanResultListener = listener;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +25,9 @@ public class MainActivity extends AppCompatActivity implements ItemEntryListener
 
         // Initialize barcode launcher
         barLauncher = registerForActivityResult(new ScanContract(), result -> {
-            // Handle the barcode scanning result
+            if (result.getContents() != null && scanResultListener != null) {
+                scanResultListener.onScanResult(result.getContents());
+            }
         });
 
         // Display the initial fragment

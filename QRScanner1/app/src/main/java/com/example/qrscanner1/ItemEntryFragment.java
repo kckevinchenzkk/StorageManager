@@ -47,6 +47,7 @@ public class ItemEntryFragment extends Fragment{
 
         if (getActivity() instanceof MainActivity) {
             MainActivity mainActivity = (MainActivity) getActivity();
+            mainActivity.setScanResultListener(result -> etItemBarcode.setText(result));
            // tableItems = mainActivity.getTableItems(); // Get tableItems from MainActivity
             btnScanBarcode.setOnClickListener(v -> mainActivity.scanCode()); // Use scanCode from MainActivity
         }
