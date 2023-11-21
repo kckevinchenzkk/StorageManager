@@ -2,6 +2,8 @@ package com.example.qrscanner1;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ScanFragment extends Fragment implements ItemEntryListener, MainActivity.ScanResultListener {
@@ -46,12 +49,25 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
         btnBack = view.findViewById(R.id.btn_back);
         btnScan = view.findViewById(R.id.btn_scan);
         etScanResult = view.findViewById(R.id.et_text_bar);
+
+        etScanResult.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                filterAndUpdateTable(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.setScanResultListener(this);
             btnScan.setOnClickListener(v -> mainActivity.scanCode());
         }
-        //btnScan.setOnClickListener(v -> {mainActivity.scanCode();});
         btnAddItem.setOnClickListener(v -> {
             // Replace with ItemEntryFragment
             getActivity().getSupportFragmentManager().beginTransaction()
@@ -66,6 +82,18 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         viewModel.getItems().observe(getViewLifecycleOwner(), this::updateTable);
         return view;
+    }
+    private void filterAndUpdateTable(String searchText) {
+        List<Item> filteredItems = new ArrayList<>();
+        List<Item> currentItems = viewModel.getItems().getValue();
+        if (currentItems != null) {
+            for (Item item : currentItems) {
+                if (item.getName().equalsIgnoreCase(searchText) || item.getBarcode().equalsIgnoreCase(searchText)) {
+                    filteredItems.add(item);
+                }
+            }
+        }
+        updateTable(filteredItems);
     }
     private void updateTable(List<Item> items) {
         tableItems.removeAllViews(); // Clear the existing views
@@ -88,14 +116,8 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
         }
     }
     @Override
-    public void onItemEntry(String itemName, String itemQuantity, String BarCode) {
-//        TableRow newRow = new TableRow(getContext());
-//        TextView nameAndQuantity = new TextView(getContext());
-//        nameAndQuantity.setText(itemName + " - Qty: " + itemQuantity);
-//        newRow.addView(nameAndQuantity);
-//        tableItems.addView(newRow);
-//        itemName = "sdfasdf";
-//        itemQuantity = "10";
+    public void onItemEntry(String itemName, String itemQuantity, String barcode) {
+        viewModel.addItem(new Item(itemName, itemQuantity, barcode));
         TableRow newRow = new TableRow(getContext());
 
         // TextView for Item Name
@@ -123,6 +145,7 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
     @Override
     public void onScanResult(String result) {
         etScanResult.setText(result);
+        filterAndUpdateTable(result);
     }
 }
 
