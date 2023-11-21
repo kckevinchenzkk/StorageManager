@@ -2,7 +2,10 @@ package com.example.qrscanner1;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TableLayout;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
@@ -54,12 +57,38 @@ public class MainActivity extends AppCompatActivity implements ItemEntryListener
         return tableItems;
     }
 
-
+    private String pendingItemName;
+    private String pendingItemQuantity;
+    private String pendingItemBarCode;
     @Override
-    public void onItemEntry(String itemName, String itemQuantity) {
-        ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag("ScanFragment");
-        if (scanFragment != null) {
-            scanFragment.onItemEntry(itemName, itemQuantity);
+    public void onItemEntry(String itemName, String itemQuantity, String itemBarCode) {
+////        ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag("ScanFragment");
+////        if (scanFragment != null) {
+////            scanFragment.onItemEntry(itemName, itemQuantity);
+////        }
+//        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+//
+//        if (currentFragment instanceof ScanFragment) {
+//            // If the current fragment is ScanFragment, cast it and call onItemEntry
+//            ((ScanFragment) currentFragment).onItemEntry(itemName, itemQuantity);
+//        } else {
+//            // Handle the case where ScanFragment is not the current fragment
+//            // This might involve logging an error, showing a message to the user, etc.
+//            Log.e("MainActivity", "ScanFragment is not the current fragment.");
+//        }
+        this.pendingItemName = itemName;
+        this.pendingItemQuantity = itemQuantity;
+        this.pendingItemBarCode = itemBarCode;
+        // Now trigger the popBackStack
+        getSupportFragmentManager().popBackStack();
+    }
+    public void processPendingItemEntry() {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (currentFragment instanceof ScanFragment && pendingItemName != null && pendingItemQuantity != null && pendingItemBarCode != null) {
+            ((ScanFragment) currentFragment).onItemEntry(pendingItemName, pendingItemQuantity, pendingItemBarCode);
+            // Clear the pending data after processing
+            pendingItemName = null;
+            pendingItemQuantity = null;
         }
     }
     public void switchToItemEntryFragment() {

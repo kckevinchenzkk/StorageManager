@@ -24,7 +24,7 @@ public class ItemsFragment extends Fragment {
             // Replace with ScanFragment
             getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new ScanFragment())
-                    .addToBackStack(null)
+                    .addToBackStack("ScanFragment")
                     .commit();
         });
         return view;

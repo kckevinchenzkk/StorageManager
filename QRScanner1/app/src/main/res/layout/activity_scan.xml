@@ -41,7 +41,8 @@
         <TableLayout
             android:id="@+id/table_items"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp">
             <!-- Items will be added here dynamically -->
         </TableLayout>
     </ScrollView>
