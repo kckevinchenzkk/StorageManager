@@ -1,8 +1,10 @@
 package com.example.qrscanner1;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -100,6 +103,7 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
         for (Item item : items) {
             // Add each item to the table
             TableRow newRow = new TableRow(getContext());
+            newRow.setOnClickListener(v -> showEditDialog(item));
             TextView tvItemName = new TextView(getContext());
             tvItemName.setText("Name: " + item.getName());
             tvItemName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25);
@@ -115,6 +119,61 @@ public class ScanFragment extends Fragment implements ItemEntryListener, MainAct
             tableItems.addView(newRow);
         }
     }
+
+    private void showEditDialog(Item item) {
+        // Create and show a dialog or a fragment for editing
+        // This is a simple example using AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Item Barcode / Edit Quantity");
+
+        // Set up the input
+        final EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setText(item.getQuantity());
+
+        final EditText inputBarcode = new EditText(getContext());
+        inputBarcode.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputBarcode.setText(item.getBarcode());
+        inputBarcode.setEnabled(false); // Make barcode field non-editable if needed
+
+        // Create a container for the EditText fields
+        LinearLayout container = new LinearLayout(getContext());
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.addView(inputBarcode); // Barcode first
+        container.addView(input); // Quantity second
+        container.setPadding(16, 8, 16, 8); // Add some padding
+
+        builder.setView(container);
+
+        // Set up the buttons
+//        builder.setPositiveButton("OK", (dialog, which) -> {
+//            String newQuantity = input.getText().toString();
+//            updateItemQuantity(item, newQuantity);
+//        });
+        // Set up the buttons
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String newQuantity = input.getText().toString();
+            updateItemQuantity(item, newQuantity);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    private void updateItemQuantity(Item item, String newQuantity) {
+        // Update the item quantity
+        item.setQuantity(newQuantity);
+
+        // Notify ViewModel about the update
+        viewModel.updateItem(item);
+
+        // Optionally, refresh the table view
+        List<Item> currentItems = viewModel.getItems().getValue();
+        if (currentItems != null) {
+            updateTable(currentItems);
+        }
+    }
+
     @Override
     public void onItemEntry(String itemName, String itemQuantity, String barcode) {
         viewModel.addItem(new Item(itemName, itemQuantity, barcode));

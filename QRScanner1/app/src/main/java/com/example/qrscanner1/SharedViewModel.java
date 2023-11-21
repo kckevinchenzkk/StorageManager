@@ -19,4 +19,17 @@ public class SharedViewModel extends ViewModel {
             items.setValue(currentItems); // Notify observers of the change
         }
     }
+
+    public void updateItem(Item item) {
+        List<Item> currentItems = items.getValue();
+        if (currentItems != null) {
+            for (int i = 0; i < currentItems.size(); i++) {
+                if (currentItems.get(i).getBarcode().equals(item.getBarcode())) {
+                    currentItems.set(i, item); // Replace with the updated item
+                    break;
+                }
+            }
+            items.setValue(currentItems); // Update the LiveData
+        }
+    }
 }
