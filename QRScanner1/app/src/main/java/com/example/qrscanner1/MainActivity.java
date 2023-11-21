@@ -1,14 +1,24 @@
 package com.example.qrscanner1;
 
+
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TableLayout;
+import android.widget.Toast;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
+
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ItemEntryListener {
     private TableLayout tableItems;
@@ -20,7 +30,24 @@ public class MainActivity extends AppCompatActivity implements ItemEntryListener
     public void setScanResultListener(ScanResultListener listener) {
         this.scanResultListener = listener;
     }
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //saveData();
+        // Code to save data from ViewModel to persistent storage
+    }
+    private void saveData() {
+        new Thread(() -> {
+            SharedViewModel viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+            List<Item> items = viewModel.getItems().getValue();
+            if (items != null && !items.isEmpty()) {
+                AppDatabase db = Room.databaseBuilder(getApplicationContext(),
+                        AppDatabase.class, "database-name").build();
+                ItemDao dao = db.itemDao();
+                dao.insertAll(items);
+            }
+        }).start();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,4 +125,20 @@ public class MainActivity extends AppCompatActivity implements ItemEntryListener
                 .addToBackStack(null)
                 .commit();
     }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Permission granted
+//                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+//                if (fragment instanceof ScanFragment) {
+//                    ((ScanFragment) fragment).performExport();
+//                }
+//            } else {
+//                // Permission denied
+//                Toast.makeText(this, "Permission denied to write to storage", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
 }
